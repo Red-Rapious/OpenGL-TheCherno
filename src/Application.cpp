@@ -9,10 +9,11 @@
 #include "Renderer.h"
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderProgramSource
 {
-    //Struct containing both the Fragment and Vertex source code
+    /*Struct containing both the Fragment and Vertex source code */
 
     std::string VertexSource;
     std::string FragmentSource;
@@ -20,8 +21,10 @@ struct ShaderProgramSource
 
 static ShaderProgramSource ParseShader(const std::string& filePath)
 {
-    //Function which open a file and return a ShaderProgramSource containing the source code
-    // of the Fragment and Vertex shaders in this file
+    /*
+    Function which open a file and return a ShaderProgramSource containing the source code
+    of the Fragment and Vertex shaders in this file
+    */
 
     std::ifstream stream(filePath); // file
     
@@ -57,7 +60,7 @@ static ShaderProgramSource ParseShader(const std::string& filePath)
 
 static unsigned int CompileShader(unsigned int type, const std::string& source)
 {
-    // Function that compile a shader of 'type' type, and return the id of the compiled shader
+    /* Function that compile a shader of 'type' type, and return the id of the compiled shader */
 
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
@@ -86,8 +89,10 @@ static unsigned int CompileShader(unsigned int type, const std::string& source)
 
 static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
-    // Create a shader from the two source codes
-    // Compile, attach, link and validate the shaders, and return the program id
+    /*
+    Create a shader from the two source codes
+    Compile, attach, link and validate the shaders, and return the program id
+    */
 
     unsigned int program = glCreateProgram();
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -104,7 +109,6 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     return program;
 }
 
-
 int main(void)
 {
     GLFWwindow* window;
@@ -113,6 +117,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+    /* Setting profile to CORE to use vertex arrays objects */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -128,6 +133,7 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    /* Set the swap interval to make the render smooth */
     glfwSwapInterval(1); 
 
     /* Initializing GLEW */
@@ -138,6 +144,7 @@ int main(void)
     std::cout << "Running on " << glGetString(GL_VERSION) << std::endl; // Print the version
     
     { // scope to avoid getting repeated errors because of the lack of glContext
+        
         /* Vertex positions */
         float positions[] = {
             -0.5f, -0.5f, // 0
@@ -152,18 +159,12 @@ int main(void)
             2, 3, 0
         };
 
-        /* Vertex array object */
-        unsigned int vao;
-        GLCall(glGenVertexArrays(1, &vao));
-        GLCall(glBindVertexArray(vao));
-
-        /*Create an array buffer for positions */
+        VertexArray va;
         VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-
-        /* Define the vertex attributes array */
-        GLCall(glEnableVertexAttribArray(0));
-        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0)); // Define an array of generic vertex attributes = layout of the vertex buffer
-
+        VertexBufferLayout layout;
+        
+        layout.Push<float>(2); // set the layout to a couple of floats
+        va.AddBuffer(vb, layout); // give the layout to opengl
 
         IndexBuffer ib(indices, 6);
 
@@ -187,17 +188,16 @@ int main(void)
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
+            glClear(GL_COLOR_BUFFER_BIT); // Default code
 
-            /* Render here */
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            //glDrawArrays(GL_TRIANGLES, 0, 3*2); // without index buffer
             GLCall(glUseProgram(shader));
             GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-            GLCall(glBindVertexArray(vao));
+            // Bind vertex array and index buffers before rendering
+            va.Bind();
             ib.Bind();
 
+            // Draw Call
             GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
             // Change color every frame
@@ -215,9 +215,11 @@ int main(void)
 
         }
 
+        /* Cleaning */
         GLCall(glDeleteProgram(shader));
 
-    }
+    } // end of the scope
+
     glfwTerminate();
     return 0;
 }
