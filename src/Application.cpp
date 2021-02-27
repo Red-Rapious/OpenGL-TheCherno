@@ -7,6 +7,7 @@
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "VertexArray.h"
+#include "VertexBufferLayout.h"
 #include "Shader.h"
 
 
@@ -78,21 +79,20 @@ int main(void)
         shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
 
         /* Unbind everything */
-        va.Unbind();
+        va.Unbind(); // unbind vertex array
         vb.Unbind(); // unbind array buffer
         ib.Unbind(); // unbind elements array buffer = index buffer
         shader.Unbind();
 
+        Renderer renderer;
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
-            glClear(GL_COLOR_BUFFER_BIT); // Default code
+            renderer.Clear();
 
-            // Bind vertex array, shader and index buffer before rendering
             shader.Bind();
             shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-            va.Bind();
-            ib.Bind();
 
             // Change color every frame
             if (r >= 1.0f)
@@ -102,11 +102,11 @@ int main(void)
             r += increment;
 
             // Draw Call
-            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr)); // number of vertices to draw
+            renderer.Draw(va, ib, shader);
+
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
-
             /* Poll for and process events */
             glfwPollEvents();
 
