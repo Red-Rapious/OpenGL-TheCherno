@@ -61,13 +61,13 @@ int main(void)
         };
 
         VertexArray va;
-        VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+        VertexBuffer vb(positions, 4 * 2 * sizeof(float)); // number of vertices stored * number of dimension
         VertexBufferLayout layout;
         
         layout.Push<float>(2); // set the layout to a couple of floats
         va.AddBuffer(vb, layout); // give the layout to opengl
 
-        IndexBuffer ib(indices, 6);
+        IndexBuffer ib(indices, 6); // number of vertices to draw
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
@@ -102,7 +102,7 @@ int main(void)
             r += increment;
 
             // Draw Call
-            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr)); // number of vertices to draw
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
