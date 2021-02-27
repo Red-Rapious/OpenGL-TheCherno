@@ -9,6 +9,7 @@
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
 #include "Shader.h"
+#include "Texture.h"
 
 
 int main(void)
@@ -49,10 +50,10 @@ int main(void)
         
         /* Vertex positions */
         float positions[] = {
-            -0.5f, -0.5f, // 0
-             0.5f, -0.5f, // 1
-             0.5f,  0.5f, // 2
-            -0.5f,  0.5f  // 3
+            -0.5f, -0.5f,  0.0f,  0.0f, // 0
+             0.5f, -0.5f,  1.0f,  0.0f, // 1
+             0.5f,  0.5f,  1.0f,  1.0f, // 2
+            -0.5f,  0.5f,  0.0f,  1.0f  // 3
         };
 
         /* Index buffer: vertex positions needed for each triangle */
@@ -61,10 +62,14 @@ int main(void)
             2, 3, 0
         };
 
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
         VertexArray va;
-        VertexBuffer vb(positions, 4 * 2 * sizeof(float)); // number of vertices stored * number of dimension
+        VertexBuffer vb(positions, 4 * 4 * sizeof(float)); // number of vertices stored * floats per vertex
         VertexBufferLayout layout;
         
+        layout.Push<float>(2); // set the layout to a couple of floats
         layout.Push<float>(2); // set the layout to a couple of floats
         va.AddBuffer(vb, layout); // give the layout to opengl
 
@@ -77,6 +82,10 @@ int main(void)
         float r = 0.0f;
         float increment = 0.05f;
         shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+
+        Texture texture("res/textures/logo.png");
+        texture.Bind();
+        shader.SetUniform1i("u_Texture", 0); // 0 = slot, default value
 
         /* Unbind everything */
         va.Unbind(); // unbind vertex array
