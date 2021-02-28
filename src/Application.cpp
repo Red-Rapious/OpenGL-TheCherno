@@ -29,7 +29,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "OpenGL Window", NULL, NULL); // 640, 480
+    window = glfwCreateWindow(960, 540, "OpenGL Window", NULL, NULL); // 640, 480
     if (!window)
     {
         glfwTerminate();
@@ -52,12 +52,21 @@ int main(void)
     { // scope to avoid getting repeated errors because of the lack of glContext
         
         /* Vertex positions */
-        float positions[] = {
+        /*float positions[] = {
             -0.5f, -0.5f,  0.0f,  0.0f, // 0
              0.5f, -0.5f,  1.0f,  0.0f, // 1
              0.5f,  0.5f,  1.0f,  1.0f, // 2
             -0.5f,  0.5f,  0.0f,  1.0f  // 3
+        };*/
+
+
+        float positions[] = {
+            50.0f,  50.0f,  0.0f,  0.0f, // 0
+            150.0f, 50.0f,  1.0f,  0.0f, // 1
+            150.0f,  150.0f,  1.0f,  1.0f, // 2
+            50.0f,  150.0f,  0.0f,  1.0f  // 3
         };
+
 
         /* Index buffer: vertex positions needed for each triangle */
         unsigned int indices[] = {
@@ -65,6 +74,7 @@ int main(void)
             2, 3, 0
         };
 
+        /* Blending */
         GLCall(glEnable(GL_BLEND));
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
@@ -79,7 +89,11 @@ int main(void)
         IndexBuffer ib(indices, 6); // number of vertices to draw
 
 
-        glm::mat4 proj = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, -1.0f, 1.0f); // 4 first values should match the aspect ratio of the window
+        glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0)); // move the object to the left <=> camera to the right
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
+
+        glm::mat4 mvp = proj * view * model;
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
@@ -88,10 +102,10 @@ int main(void)
         float r = 0.0f;
         float increment = 0.05f;
         shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", proj);
+        shader.SetUniformMat4f("u_MVP", mvp);
 
         Texture texture("res/textures/logo.png");
-        texture.Bind();
+        texture.Bind(); // default slot is 0
         shader.SetUniform1i("u_Texture", 0); // 0 = slot, default value
 
         /* Unbind everything */

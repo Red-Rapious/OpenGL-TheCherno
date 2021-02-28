@@ -1335,5 +1335,8 @@
     <Image Include="res\textures\weiss.png">
       <Filter>Fichiers de ressources</Filter>
     </Image>
+    <Image Include="res\textures\logo.png">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
   </ItemGroup>
 </Project>
