@@ -11,6 +11,9 @@
 #include "Shader.h"
 #include "Texture.h"
 
+#include "glm//glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 
 int main(void)
 {
@@ -26,7 +29,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "OpenGL Window", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "OpenGL Window", NULL, NULL); // 640, 480
     if (!window)
     {
         glfwTerminate();
@@ -75,6 +78,9 @@ int main(void)
 
         IndexBuffer ib(indices, 6); // number of vertices to draw
 
+
+        glm::mat4 proj = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, -1.0f, 1.0f); // 4 first values should match the aspect ratio of the window
+
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
 
@@ -82,6 +88,7 @@ int main(void)
         float r = 0.0f;
         float increment = 0.05f;
         shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", proj);
 
         Texture texture("res/textures/logo.png");
         texture.Bind();
